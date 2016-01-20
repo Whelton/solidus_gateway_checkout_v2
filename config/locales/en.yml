@@ -1,0 +1,4 @@
+---
+en:
+  spree:
+    payment_has_been_cancelled: The payment has been cancelled.
