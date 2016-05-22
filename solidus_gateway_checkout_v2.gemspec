@@ -3,7 +3,7 @@
 Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.name        = "solidus_gateway_checkout_v2"
-  s.version     = "1.0.1"
+  s.version     = "1.0.2"
   s.summary     = "Checkout V2 Payment Gateway for Solidus"
   s.description = s.summary
   s.required_ruby_version = ">= 2.1"

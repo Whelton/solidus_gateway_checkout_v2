@@ -4,6 +4,7 @@
 <!-- Using Card Tokenisation For Checkout V2 Gateway -->
 <script type="text/javascript" src="https://<%= payment_method.preferences[:test_mode] ? 'sandbox.checkout.com/js/v1/checkoutkit.js' : 'cdn.checkout.com/js/checkoutkit.js' %>"></script>
 <script type="text/javascript">
+
   // Payment Method Element & Id
   Spree.checkoutV2PaymentMethod = $('#payment_method_' + <%= payment_method.id %>);
   Spree.checkoutV2PaymentMethodId = Spree.checkoutV2PaymentMethod.prop('id').split("_")[2];
@@ -32,12 +33,16 @@
     Spree.checkoutV2PaymentMethod.find('#card_number, #card_expiry, #card_code').prop("disabled", true);
     // Enable Name Input
     Spree.checkoutV2PaymentMethod.find('#name_on_card_'+Spree.checkoutV2PaymentMethodId).prop("disabled", false);
-    // Create Hidden Inputs With Data From API
+    // Create Hidden Inputs With Data Validated By The API
+    var last_4_digits, expiration, payment_method;
+    last_4_digits = $('.cardNumber:visible').val().slice(-4);
+    expiration = $('.cardExpiry:visible').payment('cardExpiryVal');
+    payment_method = 'card token';
     Spree.checkoutV2PaymentMethod.append("<input type='hidden' id='checkout_v2_token' name='payment_source[" + Spree.checkoutV2PaymentMethodId + "][gateway_payment_profile_id]' value='" + response.id + "'/>");
-    Spree.checkoutV2PaymentMethod.append("<input type='hidden' name='payment_source[" + Spree.checkoutV2PaymentMethodId + "][paymentMethod]' value='" + response.card.paymentMethod + "'/>");
-    Spree.checkoutV2PaymentMethod.append("<input type='hidden' name='payment_source[" + Spree.checkoutV2PaymentMethodId + "][last_digits]' value='" + response.card.last4 + "'/>");
-    Spree.checkoutV2PaymentMethod.append("<input type='hidden' name='payment_source[" + Spree.checkoutV2PaymentMethodId + "][month]' value='" + response.card.expiryMonth + "'/>");
-    Spree.checkoutV2PaymentMethod.append("<input type='hidden' name='payment_source[" + Spree.checkoutV2PaymentMethodId + "][year]' value='" + response.card.expiryYear + "'/>");
+    Spree.checkoutV2PaymentMethod.append("<input type='hidden' name='payment_source[" + Spree.checkoutV2PaymentMethodId + "][paymentMethod]' value='" + payment_method + "'/>");
+    Spree.checkoutV2PaymentMethod.append("<input type='hidden' name='payment_source[" + Spree.checkoutV2PaymentMethodId + "][last_digits]' value='" + last_4_digits + "'/>");
+    Spree.checkoutV2PaymentMethod.append("<input type='hidden' name='payment_source[" + Spree.checkoutV2PaymentMethodId + "][month]' value='" + expiration.month + "'/>");
+    Spree.checkoutV2PaymentMethod.append("<input type='hidden' name='payment_source[" + Spree.checkoutV2PaymentMethodId + "][year]' value='" + expiration.year + "'/>");
     // Submit
     return Spree.checkoutV2PaymentMethod.parents("form").trigger('submit');
   };
@@ -72,7 +77,7 @@
         CheckoutKit.createCardToken(card, function(response){
           // If response has a card and id and not of type error, call the response handler.
           // If it is an error, the added error handler above will pick it up
-          if (('id' in response) && ('card' in response) && !(response.type == 'error')) {
+          if (('id' in response) && !(response.type == 'error')) {
             checkoutV2ResponseHandler(response);
           }
         });
